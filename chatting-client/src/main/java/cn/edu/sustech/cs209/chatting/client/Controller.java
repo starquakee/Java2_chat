@@ -12,6 +12,10 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,6 +29,8 @@ public class Controller implements Initializable {
 
     String username;
 
+    final int PORT = 9999;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -33,13 +39,47 @@ public class Controller implements Initializable {
         dialog.setHeaderText(null);
         dialog.setContentText("Username:");
 
+
         Optional<String> input = dialog.showAndWait();
         if (input.isPresent() && !input.get().isEmpty()) {
+            try {
+
+                Socket socket = new Socket("localhost", PORT);
+                OutputStream outputStream = socket.getOutputStream();
+                byte[] msg = input.get().getBytes();
+                outputStream.write(msg);
+                outputStream.flush();
+
+                InputStream inputStream = socket.getInputStream(); //接收是否已有这个名字
+                byte[] buf = new byte[1024];
+                int readLen;
+                readLen = inputStream.read(buf);
+                String has_name = new String(buf, 0, readLen);
+                if (has_name.equals("false")){
+                    System.out.println(has_name);
+                    System.out.println(input.get());
+                    username = input.get();
+                }else{
+                    while (has_name.equals("true")){
+                        dialog.setContentText("Please change username:");
+                        input = dialog.showAndWait();
+                        msg = input.get().getBytes();
+                        outputStream.write(msg);
+                        inputStream = socket.getInputStream(); //接收是否已有这个名字
+                        buf = new byte[1024];
+                        readLen = inputStream.read(buf);
+                        has_name = new String(buf, 0, readLen);
+                    }
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             /*
                TODO: Check if there is a user with the same name among the currently logged-in users,
                      if so, ask the user to change the username
              */
-            username = input.get();
+
         } else {
             System.out.println("Invalid username " + input + ", exiting");
             Platform.exit();
