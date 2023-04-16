@@ -17,9 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Controller implements Initializable {
@@ -30,6 +28,11 @@ public class Controller implements Initializable {
     String username;
 
     final int PORT = 9999;
+
+    Socket socket = new Socket("localhost", PORT);
+
+    public Controller() throws IOException {
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -44,7 +47,7 @@ public class Controller implements Initializable {
         if (input.isPresent() && !input.get().isEmpty()) {
             try {
 
-                Socket socket = new Socket("localhost", PORT);
+
                 OutputStream outputStream = socket.getOutputStream();
                 byte[] msg = input.get().getBytes();
                 outputStream.write(msg);
@@ -89,14 +92,33 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    public void createPrivateChat() {
+    public void createPrivateChat() throws IOException {
         AtomicReference<String> user = new AtomicReference<>();
 
         Stage stage = new Stage();
         ComboBox<String> userSel = new ComboBox<>();
 
+        OutputStream outputStream = socket.getOutputStream();
+        byte[] msg = "Get user names".getBytes();
+        outputStream.write(msg);
+        outputStream.flush();
+
+        InputStream inputStream = socket.getInputStream(); //接收是否已有这个名字
+        byte[] buf = new byte[1024];
+        int readLen;
+        readLen = inputStream.read(buf);
+        String usernames = new String(buf, 0, readLen);
+//        List<String> list = Arrays.asList(usernames.split("!"));
+        List<String> list = new ArrayList<>();
+        for (int i=0;i<usernames.split("!").length;i++){
+            if(!Objects.equals(usernames.split("!")[i], username)){
+                list.add(usernames.split("!")[i]);
+            }
+        }
+        System.out.println(list);
+
         // FIXME: get the user list from server, the current user's name should be filtered out
-        userSel.getItems().addAll("Item 1", "Item 2", "Item 3");
+        userSel.getItems().addAll(list);
 
         Button okBtn = new Button("OK");
         okBtn.setOnAction(e -> {
