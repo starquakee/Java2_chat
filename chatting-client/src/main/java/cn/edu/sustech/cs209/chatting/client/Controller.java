@@ -25,7 +25,16 @@ public class Controller implements Initializable {
     @FXML
     ListView<Message> chatContentList;
 
+    @FXML
+    ListView<String> chatList;
+
+    @FXML
+    Label currentOnlineCnt;
+
     String username;
+
+    @FXML
+    Label currentUsername;
 
     final int PORT = 9999;
 
@@ -62,6 +71,7 @@ public class Controller implements Initializable {
                     System.out.println(has_name);
                     System.out.println(input.get());
                     username = input.get();
+                    currentUsername.setText("Current User: "+username);
                 }else{
                     while (has_name.equals("true")){
                         dialog.setContentText("Please change username:");
@@ -78,6 +88,7 @@ public class Controller implements Initializable {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
             /*
                TODO: Check if there is a user with the same name among the currently logged-in users,
                      if so, ask the user to change the username
@@ -94,6 +105,7 @@ public class Controller implements Initializable {
     @FXML
     public void createPrivateChat() throws IOException {
         AtomicReference<String> user = new AtomicReference<>();
+//        List<AtomicReference<String>> users = new ArrayList<>();
 
         Stage stage = new Stage();
         ComboBox<String> userSel = new ComboBox<>();
@@ -108,6 +120,7 @@ public class Controller implements Initializable {
         int readLen;
         readLen = inputStream.read(buf);
         String usernames = new String(buf, 0, readLen);
+        currentOnlineCnt.setText("Online: "+usernames.split("!").length);
 //        List<String> list = Arrays.asList(usernames.split("!"));
         List<String> list = new ArrayList<>();
         for (int i=0;i<usernames.split("!").length;i++){
@@ -133,9 +146,13 @@ public class Controller implements Initializable {
         stage.setScene(new Scene(box));
         stage.showAndWait();
 
+        chatList.getItems().add(user.get());
+        chatContentList.getItems().add(new Message(System.currentTimeMillis(),username,user.get(),"data"));
+
         // TODO: if the current user already chatted with the selected user, just open the chat with that user
         // TODO: otherwise, create a new chat item in the left panel, the title should be the selected user's name
     }
+
 
     /**
      * A new dialog should contain a multi-select list, showing all user's name.
@@ -148,7 +165,55 @@ public class Controller implements Initializable {
      * UserA, UserB (2)
      */
     @FXML
-    public void createGroupChat() {
+    public void createGroupChat() throws IOException {
+        List<AtomicReference<String>> users = new ArrayList<>();
+        List<String> users_ = new ArrayList<>();
+        String group_name = "";
+        Stage stage = new Stage();
+        OutputStream outputStream = socket.getOutputStream();
+        byte[] msg = "Get user names".getBytes();
+        outputStream.write(msg);
+        outputStream.flush();
+
+        InputStream inputStream = socket.getInputStream(); //接收是否已有这个名字
+        byte[] buf = new byte[1024];
+        int readLen;
+        readLen = inputStream.read(buf);
+        String usernames = new String(buf, 0, readLen);
+        HBox hbox = new HBox(10);
+        hbox.setAlignment(Pos.CENTER);
+        hbox.setPadding(new Insets(20, 20, 20, 20));
+        List<CheckBox> checkBoxes = new ArrayList<>();
+        for(int i=0;i<usernames.split("!").length;i++){
+            checkBoxes.add(new CheckBox(usernames.split("!")[i]));
+        }
+        Button okBtn = new Button("OK");
+        okBtn.setOnAction(e -> {
+            for (CheckBox checkBox : checkBoxes) {
+                if (checkBox.isSelected()) {
+                    AtomicReference<String> user = new AtomicReference<>();
+                    user.set(checkBox.getText());
+                    users.add(user);
+                    users_.add(user.get());
+                }
+            }
+            System.out.println(users);
+            stage.close();
+        });
+        hbox.getChildren().addAll(checkBoxes);
+        hbox.getChildren().addAll(okBtn);
+        stage.setScene(new Scene(hbox));
+        stage.showAndWait();
+
+        if(users_.size()>3){
+            Collections.sort(users_);
+            group_name = users_.get(0)+", "+users_.get(1)+", "+users_.get(2)+"... ("+users_.size()+")";
+        }else {
+
+        }
+
+
+
     }
 
     /**

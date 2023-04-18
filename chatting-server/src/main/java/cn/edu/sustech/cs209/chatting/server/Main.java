@@ -14,6 +14,12 @@ public class Main {
     public static void main(String[] args) throws IOException {
         List<String> user_names = new ArrayList<>();
         user_names.add("f");
+        user_names.add("ff");
+        user_names.add("fff");
+        user_names.add("ffff");
+        user_names.add("fffff");
+        user_names.add("ffffff");
+        user_names.add("fffffff");
         final int PORT = 9999;
         ServerSocket server = new ServerSocket(PORT);
         System.out.println("Waiting for clients to connect...");
