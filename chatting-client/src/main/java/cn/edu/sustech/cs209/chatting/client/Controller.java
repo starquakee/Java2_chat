@@ -15,6 +15,8 @@ import javafx.util.Callback;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.*;
@@ -67,33 +69,25 @@ public class Controller implements Initializable {
         Optional<String> input = dialog.showAndWait();
         if (input.isPresent() && !input.get().isEmpty()) {
             try {
+                PrintWriter out = new PrintWriter(socket.getOutputStream());
+                Scanner in = new Scanner(socket.getInputStream());
+                out.println("Store_name"+"!"+input.get());
+                out.flush();
 
 
-                OutputStream outputStream = socket.getOutputStream();
-                byte[] msg = input.get().getBytes();
-                outputStream.write(msg);
-                outputStream.flush();
-
-                InputStream inputStream = socket.getInputStream(); //接收是否已有这个名字
-                byte[] buf = new byte[1024];
-                int readLen;
-                readLen = inputStream.read(buf);
-                String has_name = new String(buf, 0, readLen);
+                String has_name = in.next();
                 if (has_name.equals("false")){
-                    System.out.println(has_name);
-                    System.out.println(input.get());
                     username = input.get();
                     currentUsername.setText("Current User: "+username);
                 }else{
                     while (has_name.equals("true")){
+                        System.out.println("reinput user name");
                         dialog.setContentText("Please change username:");
                         input = dialog.showAndWait();
-                        msg = input.get().getBytes();
-                        outputStream.write(msg);
-                        inputStream = socket.getInputStream(); //接收是否已有这个名字
-                        buf = new byte[1024];
-                        readLen = inputStream.read(buf);
-                        has_name = new String(buf, 0, readLen);
+                        out.println("Store_name"+"!"+input.get());
+                        out.flush();
+
+                        has_name = in.next();
                     }
                 }
 
@@ -112,6 +106,17 @@ public class Controller implements Initializable {
         }
 
         chatContentList.setCellFactory(new MessageCellFactory());
+
+
+        List<String> user_names = new ArrayList<>();
+        Map<String, List<String>> name_messages = new HashMap<>();
+        Map<String, Integer> name_mess_num = new HashMap<>();
+        Map<String, Socket> user_socket = new HashMap<>();
+
+
+        new Thread(new Client_Service(socket, user_names, name_messages, name_mess_num, user_socket)).start();
+
+
     }
 
     @FXML
@@ -121,17 +126,14 @@ public class Controller implements Initializable {
 
         Stage stage = new Stage();
         ComboBox<String> userSel = new ComboBox<>();
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        Scanner in = new Scanner(socket.getInputStream());
 
-        OutputStream outputStream = socket.getOutputStream();
-        byte[] msg = "Get user names".getBytes();
-        outputStream.write(msg);
-        outputStream.flush();
+        out.println("Get_user_names");
+        out.flush();
 
-        InputStream inputStream = socket.getInputStream(); //接收是否已有这个名字
-        byte[] buf = new byte[1024];
-        int readLen;
-        readLen = inputStream.read(buf);
-        String usernames = new String(buf, 0, readLen);
+
+        String usernames = in.next();
         currentOnlineCnt.setText("Online: "+usernames.split("!").length);
 //        List<String> list = Arrays.asList(usernames.split("!"));
         List<String> list = new ArrayList<>();
@@ -186,18 +188,14 @@ public class Controller implements Initializable {
     public void createGroupChat() throws IOException {
         List<AtomicReference<String>> users = new ArrayList<>();
         List<String> users_ = new ArrayList<>();
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        Scanner in = new Scanner(socket.getInputStream());
         String group_name = "";
         Stage stage = new Stage();
-        OutputStream outputStream = socket.getOutputStream();
-        byte[] msg = "Get user names".getBytes();
-        outputStream.write(msg);
-        outputStream.flush();
+        out.println("Get user names");
+        out.flush();
 
-        InputStream inputStream = socket.getInputStream(); //接收是否已有这个名字
-        byte[] buf = new byte[1024];
-        int readLen;
-        readLen = inputStream.read(buf);
-        String usernames = new String(buf, 0, readLen);
+        String usernames = in.next();
         HBox hbox = new HBox(10);
         hbox.setAlignment(Pos.CENTER);
         hbox.setPadding(new Insets(20, 20, 20, 20));
@@ -250,10 +248,23 @@ public class Controller implements Initializable {
      * After sending the message, you should clear the text input field.
      */
     @FXML
-    public void doSendMessage() {
+    public void doSendMessage() throws IOException {
         current_selected = chatList.getSelectionModel().getSelectedItem();
-        System.out.println(inputArea.getText());
+        System.out.println(current_selected);
+        String send_to = current_selected;
+        String send_by = username;
+        String input = inputArea.getText();
         inputArea.clear();
+        Long time = System.currentTimeMillis();
+        chatContentList.getItems().add(new Message(time,send_by,send_to,input));
+
+        Message message = new Message(time,send_by,send_to,input);
+        String message_str = "Send_message"+"!"+time+"!"+send_by+"!"+send_to+"!"+input;
+        OutputStream outputStream = socket.getOutputStream();
+        byte[] msg = message_str.getBytes();
+        outputStream.write(msg);
+        outputStream.flush();
+
 
         // TODO
     }

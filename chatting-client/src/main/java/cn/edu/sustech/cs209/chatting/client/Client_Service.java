@@ -1,10 +1,10 @@
-package cn.edu.sustech.cs209.chatting.server;
+package cn.edu.sustech.cs209.chatting.client;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
 
-public class Service implements Runnable {
+public class Client_Service implements Runnable {
     Socket s;
     private Scanner in;
     private PrintWriter out;
@@ -17,7 +17,7 @@ public class Service implements Runnable {
     Map<String, List<String>> name_messages;
 
     Map<String, Integer> name_mess_num;
-    public Service(Socket socket, List<String> user_names, Map<String, List<String>> name_messages,Map<String, Integer> name_mess_num, Map<String, Socket> user_socket){
+    public Client_Service(Socket socket, List<String> user_names, Map<String, List<String>> name_messages,Map<String, Integer> name_mess_num, Map<String, Socket> user_socket){
         this.s=socket;
         this.user_names=user_names;
         this.name_messages=name_messages;
@@ -99,7 +99,7 @@ public class Service implements Runnable {
                     name_messages.putIfAbsent(userName, m);
                 }
                 break;
-    }
+        }
 //            if(name_messages.get(user_name)!=null){
 //                System.out.println(user_name+" "+name_messages.get(user_name)+" "+name_mess_num.get(user_name));
 //                if(name_messages.get(user_name).size()>name_mess_num.get(user_name)){
@@ -117,15 +117,15 @@ public class Service implements Runnable {
 
 
 
-        }
+    }
 
-            //以下为关闭各种要关闭的资源
+    //以下为关闭各种要关闭的资源
 //            fos.close();
 //            is.close();
 //            os.close();
 //            socket.close();
 
-        }
+}
 
 
 
