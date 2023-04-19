@@ -24,7 +24,7 @@
         </Menu>
     </MenuBar>
     <SplitPane dividerPositions="0.25" focusTraversable="true" VBox.vgrow="ALWAYS">
-        <ListView fx:id="chatList" prefHeight="200.0" prefWidth="200.0"/>
+        <ListView fx:id="chatList"  prefHeight="200.0" prefWidth="200.0"/>
         <SplitPane dividerPositions="0.85" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
             <ListView fx:id="chatContentList" prefHeight="200.0" prefWidth="200.0"/>
             <HBox prefHeight="100.0" prefWidth="200.0">

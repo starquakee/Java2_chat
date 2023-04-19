@@ -29,7 +29,19 @@ public class Controller implements Initializable {
     ListView<String> chatList;
 
     @FXML
+    TextArea inputArea;
+
+
+    Set<String> chatSet = new HashSet<>();
+
+    Set<String> chatGroupSet = new HashSet<>();
+
+    Map<String, List<Message>> chatname_messages = new HashMap<>();
+
+    @FXML
     Label currentOnlineCnt;
+
+    String current_selected;
 
     String username;
 
@@ -145,9 +157,15 @@ public class Controller implements Initializable {
         box.getChildren().addAll(userSel, okBtn);
         stage.setScene(new Scene(box));
         stage.showAndWait();
+        if(user.get()!=null){
+            chatSet.add(user.get());
+            chatList.getItems().clear();
 
-        chatList.getItems().add(user.get());
-        chatContentList.getItems().add(new Message(System.currentTimeMillis(),username,user.get(),"data"));
+            chatList.getItems().addAll(chatSet);
+            chatList.getItems().addAll(chatGroupSet);
+            chatContentList.getItems().add(new Message(System.currentTimeMillis(),username,user.get(),"\uD83D\uDE00"));
+        }
+
 
         // TODO: if the current user already chatted with the selected user, just open the chat with that user
         // TODO: otherwise, create a new chat item in the left panel, the title should be the selected user's name
@@ -207,10 +225,19 @@ public class Controller implements Initializable {
 
         if(users_.size()>3){
             Collections.sort(users_);
-            group_name = users_.get(0)+", "+users_.get(1)+", "+users_.get(2)+"... ("+users_.size()+")";
+            group_name = users_.get(0) + ", " + users_.get(1) + ", " + users_.get(2) + "... (" + users_.size() + ")";
         }else {
+            for(int i=0;i<users_.size()-1;i++){
+                group_name+=users_.get(i)+(", ");
+            }
 
+            group_name+=users_.get(users_.size()-1)+" ("+users_.size()+")";
         }
+        chatGroupSet.add(group_name);
+        chatList.getItems().clear();
+
+        chatList.getItems().addAll(chatSet);
+        chatList.getItems().addAll(chatGroupSet);
 
 
 
@@ -224,6 +251,10 @@ public class Controller implements Initializable {
      */
     @FXML
     public void doSendMessage() {
+        current_selected = chatList.getSelectionModel().getSelectedItem();
+        System.out.println(inputArea.getText());
+        inputArea.clear();
+
         // TODO
     }
 

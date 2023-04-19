@@ -27,7 +27,10 @@
                 <artifactId>chatting-common</artifactId>
                 <version>dev-SNAPSHOT</version>
             </dependency>
+
+
         </dependencies>
+
     </dependencyManagement>
 
     <build>

@@ -34,7 +34,7 @@ public class Service implements Runnable {
                 if (!((readLen = inputStream.read(buf))!=-1)) break;
             } catch (IOException e) {
 //                throw new RuntimeException(e);
-                System.out.println();
+
             }
             if(!new String(buf, 0, readLen).equals("Get user names")){
                 user_name = new String(buf, 0, readLen);
@@ -68,7 +68,7 @@ public class Service implements Runnable {
                 try {
                     outputStream.write(msg);
                 } catch (IOException e) {
-                    System.out.println();
+//                    System.out.println();
                 }
             }
 
