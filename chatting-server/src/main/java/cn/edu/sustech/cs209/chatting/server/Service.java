@@ -88,6 +88,31 @@ public class Service implements Runnable {
                 //                name_mess_num.merge(send_to, 1, Integer::sum);
                 break;
             case "Send_group_message":
+                Long time_group = Long.valueOf(message.split("!")[1]);
+                String send_by_group = message.split("!")[2];
+                String send_to_group = message.split("!")[3];
+                String input_group = message.split("!")[4];
+                System.out.println("input: "+input_group);
+                List<String> m_group = new ArrayList<>();
+                name_messages.putIfAbsent(send_to_group, m_group);
+                String[] group_users;
+                if(send_to_group.contains("...")){
+                    group_users = send_to_group.split("...")[0].split(", ");
+                }else {
+                    group_users = send_to_group.split(" \\(")[0].split(", ");
+                }
+                List<String> messages_group = name_messages.get(send_to_group);
+                messages_group.add(message);
+                name_messages.put(send_to_group, messages_group);
+                for(String group_user:group_users){
+                    if(!Objects.equals(group_user, send_by_group)){
+                        Socket send_to_socket_group = user_socket.get(group_user);
+                        PrintWriter out_to_group = new PrintWriter(send_to_socket_group.getOutputStream());
+                        out_to_group.println("Get_group_message"+"!"+time_group+"!"+send_by_group+"!"+send_to_group+"!"+input_group);
+                        out_to_group.flush();
+                    }
+
+                }
                 break;
             case "Store_name":
                 user_name = message.split("!")[1];

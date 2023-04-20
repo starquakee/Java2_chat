@@ -18,12 +18,12 @@ public class Main {
         Map<String, List<String>> name_messages = new HashMap<>();
         Map<String, Integer> name_mess_num = new HashMap<>();
         Map<String, Socket> user_socket = new HashMap<>();
-        user_names.add("f");
-        user_names.add("ff");
-        user_names.add("fff");
-        user_names.add("ffff");
-        user_names.add("fffff");
-        user_names.add("ffffff");
+//        user_names.add("f");
+//        user_names.add("ff");
+//        user_names.add("fff");
+//        user_names.add("ffff");
+//        user_names.add("fffff");
+//        user_names.add("ffffff");
         final int PORT = 9999;
         ServerSocket server = new ServerSocket(PORT);
         System.out.println("Waiting for clients to connect...");
