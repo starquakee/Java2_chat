@@ -34,6 +34,8 @@ public class Controller implements Initializable {
     TextArea inputArea;
 
 
+
+
     Set<String> chatSet = new HashSet<>();
 
     Set<String> chatGroupSet = new HashSet<>();
@@ -75,6 +77,8 @@ public class Controller implements Initializable {
                 out.flush();
 
 
+
+
                 String has_name = in.next();
                 if (has_name.equals("false")){
                     username = input.get();
@@ -113,16 +117,13 @@ public class Controller implements Initializable {
         Map<String, Integer> name_mess_num = new HashMap<>();
         Map<String, Socket> user_socket = new HashMap<>();
 
-
-        new Thread(new Client_Service(socket, user_names, name_messages, name_mess_num, user_socket)).start();
-
+        new Thread(new Client_Service(socket, user_names, name_messages, name_mess_num, user_socket, chatContentList, username,currentOnlineCnt)).start();
 
     }
 
     @FXML
-    public void createPrivateChat() throws IOException {
+    public void createPrivateChat() throws IOException, InterruptedException {
         AtomicReference<String> user = new AtomicReference<>();
-//        List<AtomicReference<String>> users = new ArrayList<>();
 
         Stage stage = new Stage();
         ComboBox<String> userSel = new ComboBox<>();
@@ -133,19 +134,23 @@ public class Controller implements Initializable {
         out.flush();
 
 
-        String usernames = in.next();
-        currentOnlineCnt.setText("Online: "+usernames.split("!").length);
-//        List<String> list = Arrays.asList(usernames.split("!"));
-        List<String> list = new ArrayList<>();
-        for (int i=0;i<usernames.split("!").length;i++){
-            if(!Objects.equals(usernames.split("!")[i], username)){
-                list.add(usernames.split("!")[i]);
-            }
-        }
-        System.out.println(list);
+//        String usernames = in.next();
+        Thread.sleep(50);
+        String usernames = Main.recv;
+        System.out.println("recv: "+usernames);
+        System.out.println(Main.users);
+
+        currentOnlineCnt.setText("Online: "+Main.users.size());
+//        List<String> list = new ArrayList<>();
+//        for (int i=0;i<usernames.split("!").length;i++){
+//            if(!Objects.equals(usernames.split("!")[i], username)){
+//                list.add(usernames.split("!")[i]);
+//            }
+//        }
+        System.out.println(Main.users);
 
         // FIXME: get the user list from server, the current user's name should be filtered out
-        userSel.getItems().addAll(list);
+        userSel.getItems().addAll(Main.users);
 
         Button okBtn = new Button("OK");
         okBtn.setOnAction(e -> {
@@ -260,10 +265,10 @@ public class Controller implements Initializable {
 
         Message message = new Message(time,send_by,send_to,input);
         String message_str = "Send_message"+"!"+time+"!"+send_by+"!"+send_to+"!"+input;
-        OutputStream outputStream = socket.getOutputStream();
-        byte[] msg = message_str.getBytes();
-        outputStream.write(msg);
-        outputStream.flush();
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        Scanner in = new Scanner(socket.getInputStream());
+        out.println(message_str);
+        out.flush();
 
 
         // TODO
@@ -301,6 +306,11 @@ public class Controller implements Initializable {
                         wrapper.setAlignment(Pos.TOP_LEFT);
                         wrapper.getChildren().addAll(nameLabel, msgLabel);
                         msgLabel.setPadding(new Insets(0, 0, 0, 20));
+                    }
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
 
                     setContentDisplay(ContentDisplay.GRAPHIC_ONLY);

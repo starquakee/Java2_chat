@@ -53,10 +53,10 @@ public class Service implements Runnable {
             if (!in.hasNext()) return;
             String mess = in.next();
             System.out.println(mess);
-            excuteCommand(mess);
+            executeCommand(mess);
         }
     }
-    public void excuteCommand(String message) throws IOException {
+    public void executeCommand(String message) throws IOException {
         String command = message.split("!")[0];
         switch (command){
             case "Get_user_names":
@@ -76,9 +76,10 @@ public class Service implements Runnable {
                 messages.add(message);
                 name_messages.put(send_to, messages);
                 System.out.println(name_messages);
+                System.out.println(user_socket);
                 Socket send_to_socket = user_socket.get(send_to);
                 PrintWriter out_to = new PrintWriter(send_to_socket.getOutputStream());
-                out_to.println(time+"!"+send_by+"!"+send_to+"!"+input);
+                out_to.println("Get_message"+"!"+time+"!"+send_by+"!"+send_to+"!"+input);
                 out_to.flush();
 
                 //                name_mess_num.merge(send_to, 1, Integer::sum);

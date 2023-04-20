@@ -6,9 +6,12 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main extends Application {
-
+    static String recv;
+    static List<String> users = new ArrayList<>();
     public static void main(String[] args) {
         launch();
     }

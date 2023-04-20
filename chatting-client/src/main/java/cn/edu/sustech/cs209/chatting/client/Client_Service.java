@@ -1,5 +1,9 @@
 package cn.edu.sustech.cs209.chatting.client;
 
+import cn.edu.sustech.cs209.chatting.common.Message;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
@@ -7,22 +11,26 @@ import java.util.*;
 public class Client_Service implements Runnable {
     Socket s;
     private Scanner in;
+    Label currentOnlineCnt;
     private PrintWriter out;
     List<String> user_names;
-
     public String user_name;
-
     Map<String, Socket> user_socket;
-
     Map<String, List<String>> name_messages;
-
     Map<String, Integer> name_mess_num;
-    public Client_Service(Socket socket, List<String> user_names, Map<String, List<String>> name_messages,Map<String, Integer> name_mess_num, Map<String, Socket> user_socket){
+    ListView<Message> chatContentList;
+    String username;
+    public Client_Service(Socket socket, List<String> user_names, Map<String, List<String>> name_messages,
+                          Map<String, Integer> name_mess_num, Map<String, Socket> user_socket,
+                          ListView<Message> chatContentList, String username, Label currentOnlineCnt){
         this.s=socket;
         this.user_names=user_names;
         this.name_messages=name_messages;
         this.name_mess_num=name_mess_num;
         this.user_socket=user_socket;
+        this.chatContentList=chatContentList;
+        this.username=username;
+        this.currentOnlineCnt=currentOnlineCnt;
     }
     @Override
     public void run() {
@@ -35,14 +43,12 @@ public class Client_Service implements Runnable {
             } finally {
                 s.close();
             }
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
             ex.printStackTrace();
         }
     }
 
-    public void doService() throws IOException {
-
-
+    public void doService() throws IOException, InterruptedException {
         while (true) {
             if(name_messages.get(user_name)!=null){
                 System.out.println(user_name+" "+name_messages.get(user_name)+" "+name_mess_num.get(user_name));
@@ -52,11 +58,19 @@ public class Client_Service implements Runnable {
             }
             if (!in.hasNext()) return;
             String mess = in.next();
+            Main.recv = mess;
+            System.out.println("!!!!!!");
             System.out.println(mess);
-            excuteCommand(mess);
+            Main.users.clear();
+            for (int i=0;i<mess.split("!").length;i++){
+                if(!Objects.equals(mess.split("!")[i], username)){
+                    Main.users.add(mess.split("!")[i]);
+                }
+            }
+            executeCommand(mess);
         }
     }
-    public void excuteCommand(String message) throws IOException {
+    public void executeCommand(String message) throws IOException, InterruptedException {
         String command = message.split("!")[0];
         switch (command){
             case "Get_user_names":
@@ -78,11 +92,18 @@ public class Client_Service implements Runnable {
                 System.out.println(name_messages);
                 Socket send_to_socket = user_socket.get(send_to);
                 PrintWriter out_to = new PrintWriter(send_to_socket.getOutputStream());
-                out_to.println(time+"!"+send_by+"!"+send_to+"!"+input);
+                out_to.println("Get_message"+"!"+time+"!"+send_by+"!"+send_to+"!"+input);
                 out_to.flush();
-
                 //                name_mess_num.merge(send_to, 1, Integer::sum);
                 break;
+            case "Get_message":
+                Long time_get = Long.valueOf(message.split("!")[1]);
+                String send_by_get = message.split("!")[2];
+                String send_to_get = message.split("!")[3];
+                String input_get = message.split("!")[4];
+                Thread.sleep(50);
+                chatContentList.getItems().add(new Message(time_get,send_by_get,send_to_get,input_get));
+
             case "Store_name":
                 user_name = message.split("!")[1];
                 String has_name = "false";
