@@ -30,15 +30,19 @@ public class Controller implements Initializable {
     @FXML
     ListView<String> chatList;
 
+
+
     @FXML
     TextArea inputArea;
 
-
+    Map<String, List<Message>> name_content = new HashMap<>();
 
 
     Set<String> chatSet = new HashSet<>();
 
     Set<String> chatGroupSet = new HashSet<>();
+
+    Set<String> allChatSet = new HashSet<>(); //包括个人和群组
 
     Map<String, List<Message>> chatname_messages = new HashMap<>();
 
@@ -110,6 +114,25 @@ public class Controller implements Initializable {
         }
 
         chatContentList.setCellFactory(new MessageCellFactory());
+        chatList.setCellFactory(param -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+
+                setText(item);
+
+                setOnMouseClicked(event -> {
+                    if (!isEmpty()) {
+                        String selectedItem = getItem();
+                        chatContentList.getItems().clear();
+                        chatContentList.getItems().addAll(name_content.get(getItem())) ;
+                        System.out.println(name_content);
+                        System.out.println("selectedItem: "+selectedItem); // 打印所选项目的名称
+                    }
+                });
+            }
+        });
+
 
 
         List<String> user_names = new ArrayList<>();
@@ -117,7 +140,7 @@ public class Controller implements Initializable {
         Map<String, Integer> name_mess_num = new HashMap<>();
         Map<String, Socket> user_socket = new HashMap<>();
 
-        new Thread(new Client_Service(socket, user_names, name_messages, name_mess_num, user_socket, chatContentList, username,currentOnlineCnt)).start();
+        new Thread(new Client_Service(socket, user_names, name_messages, name_mess_num, user_socket, chatContentList, username,currentOnlineCnt, name_content)).start();
 
     }
 
@@ -166,11 +189,14 @@ public class Controller implements Initializable {
         stage.showAndWait();
         if(user.get()!=null){
             chatSet.add(user.get());
+            allChatSet.add(user.get());
+            List<Message> content = new ArrayList<>();
+            name_content.put(user.get(),content);
             chatList.getItems().clear();
 
             chatList.getItems().addAll(chatSet);
             chatList.getItems().addAll(chatGroupSet);
-            chatContentList.getItems().add(new Message(System.currentTimeMillis(),username,user.get(),"\uD83D\uDE00"));
+//            chatContentList.getItems().add(new Message(System.currentTimeMillis(),username,user.get(),"\uD83D\uDE00"));
         }
 
 
@@ -190,7 +216,7 @@ public class Controller implements Initializable {
      * UserA, UserB (2)
      */
     @FXML
-    public void createGroupChat() throws IOException {
+    public void createGroupChat() throws IOException, InterruptedException {
         List<AtomicReference<String>> users = new ArrayList<>();
         List<String> users_ = new ArrayList<>();
         PrintWriter out = new PrintWriter(socket.getOutputStream());
@@ -200,7 +226,11 @@ public class Controller implements Initializable {
         out.println("Get user names");
         out.flush();
 
-        String usernames = in.next();
+        Thread.sleep(50);
+        String usernames = Main.recv;
+        System.out.println("recv: "+usernames);
+        System.out.println(Main.users);
+
         HBox hbox = new HBox(10);
         hbox.setAlignment(Pos.CENTER);
         hbox.setPadding(new Insets(20, 20, 20, 20));
@@ -237,13 +267,14 @@ public class Controller implements Initializable {
             group_name+=users_.get(users_.size()-1)+" ("+users_.size()+")";
         }
         chatGroupSet.add(group_name);
+        allChatSet.add(group_name);
+        List<Message> content = new ArrayList<>();
+//        content.setCellFactory(new MessageCellFactory());
+        name_content.put(group_name,content);
         chatList.getItems().clear();
 
         chatList.getItems().addAll(chatSet);
         chatList.getItems().addAll(chatGroupSet);
-
-
-
     }
 
     /**
@@ -261,14 +292,25 @@ public class Controller implements Initializable {
         String input = inputArea.getText();
         inputArea.clear();
         Long time = System.currentTimeMillis();
-        chatContentList.getItems().add(new Message(time,send_by,send_to,input));
+//        chatContentList.getItems().add(new Message(time,send_by,send_to,input));
+        if(!send_to.contains(", ")){ //单人聊天
+            Message message = new Message(time,send_by,send_to,input);
+            System.out.println("name_content: "+name_content);
+            List<Message> content= name_content.get(send_to);
+            content.add(message);
+            name_content.put(send_by, content);
+            name_content.put(send_to, content);
+            chatContentList.getItems().add(message);
+            String message_str = "Send_message"+"!"+time+"!"+send_by+"!"+send_to+"!"+input;
+            PrintWriter out = new PrintWriter(socket.getOutputStream());
+            Scanner in = new Scanner(socket.getInputStream());
+            out.println(message_str);
+            out.flush();
+        }else { //多人聊天
 
-        Message message = new Message(time,send_by,send_to,input);
-        String message_str = "Send_message"+"!"+time+"!"+send_by+"!"+send_to+"!"+input;
-        PrintWriter out = new PrintWriter(socket.getOutputStream());
-        Scanner in = new Scanner(socket.getInputStream());
-        out.println(message_str);
-        out.flush();
+        }
+
+
 
 
         // TODO
@@ -312,11 +354,22 @@ public class Controller implements Initializable {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
+//                    setOnMouseClicked(event -> {
+//                        if (!isEmpty()) {
+//
+//                            String selectedItem = listView.getSelectionModel().getSelectedItem();
+//                            chatContentList = name_content.get(getItem().g);
+//
+//                        }
+//                    });
 
                     setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                     setGraphic(wrapper);
                 }
             };
+
+
         }
     }
+
 }

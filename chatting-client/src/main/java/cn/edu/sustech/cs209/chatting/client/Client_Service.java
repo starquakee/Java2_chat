@@ -19,10 +19,12 @@ public class Client_Service implements Runnable {
     Map<String, List<String>> name_messages;
     Map<String, Integer> name_mess_num;
     ListView<Message> chatContentList;
+    Map<String, List<Message>> name_content = new HashMap<>();
     String username;
     public Client_Service(Socket socket, List<String> user_names, Map<String, List<String>> name_messages,
                           Map<String, Integer> name_mess_num, Map<String, Socket> user_socket,
-                          ListView<Message> chatContentList, String username, Label currentOnlineCnt){
+                          ListView<Message> chatContentList, String username, Label currentOnlineCnt,
+                          Map<String, List<Message>> name_content){
         this.s=socket;
         this.user_names=user_names;
         this.name_messages=name_messages;
@@ -31,6 +33,7 @@ public class Client_Service implements Runnable {
         this.chatContentList=chatContentList;
         this.username=username;
         this.currentOnlineCnt=currentOnlineCnt;
+        this.name_content=name_content;
     }
     @Override
     public void run() {
@@ -57,10 +60,9 @@ public class Client_Service implements Runnable {
                 }
             }
             if (!in.hasNext()) return;
-            String mess = in.next();
+            String mess = in.nextLine();
             Main.recv = mess;
-            System.out.println("!!!!!!");
-            System.out.println(mess);
+            System.out.println("mess"+mess);
             Main.users.clear();
             for (int i=0;i<mess.split("!").length;i++){
                 if(!Objects.equals(mess.split("!")[i], username)){
@@ -101,8 +103,21 @@ public class Client_Service implements Runnable {
                 String send_by_get = message.split("!")[2];
                 String send_to_get = message.split("!")[3];
                 String input_get = message.split("!")[4];
+                System.out.println("input get: "+input_get);
+                Message message_get = new Message(time_get,send_by_get,send_to_get,input_get);
                 Thread.sleep(50);
-                chatContentList.getItems().add(new Message(time_get,send_by_get,send_to_get,input_get));
+                List<Message> content= name_content.get(send_to_get);
+                if (content!=null){
+                    content.add(message_get);
+                }else {
+                    content=new ArrayList<>();
+                    content.add(message_get);
+                }
+
+                name_content.put(send_by_get, content);
+                name_content.put(send_to_get, content);
+                chatContentList.getItems().add(message_get);
+//                name_content.get()
 
             case "Store_name":
                 user_name = message.split("!")[1];

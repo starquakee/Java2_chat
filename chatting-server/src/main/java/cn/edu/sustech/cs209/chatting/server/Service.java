@@ -51,8 +51,8 @@ public class Service implements Runnable {
                 }
             }
             if (!in.hasNext()) return;
-            String mess = in.next();
-            System.out.println(mess);
+            String mess = in.nextLine();
+            System.out.println("mess: "+mess);
             executeCommand(mess);
         }
     }
@@ -70,8 +70,12 @@ public class Service implements Runnable {
                 String send_by = message.split("!")[2];
                 String send_to = message.split("!")[3];
                 String input = message.split("!")[4];
+                System.out.println("input: "+input);
+                List<String> m = new ArrayList<>();
+                name_messages.putIfAbsent(send_to, m);
                 List<String> messages = name_messages.get(send_to);
                 System.out.println(name_messages);
+                System.out.println("send to: "+send_to);
                 System.out.println(messages);
                 messages.add(message);
                 name_messages.put(send_to, messages);
@@ -81,8 +85,9 @@ public class Service implements Runnable {
                 PrintWriter out_to = new PrintWriter(send_to_socket.getOutputStream());
                 out_to.println("Get_message"+"!"+time+"!"+send_by+"!"+send_to+"!"+input);
                 out_to.flush();
-
                 //                name_mess_num.merge(send_to, 1, Integer::sum);
+                break;
+            case "Send_group_message":
                 break;
             case "Store_name":
                 user_name = message.split("!")[1];
@@ -96,8 +101,8 @@ public class Service implements Runnable {
                 user_socket.put(user_name, s);
                 for (String userName : user_names) {
                     name_mess_num.putIfAbsent(userName, 0);
-                    List<String> m = new ArrayList<>();
-                    name_messages.putIfAbsent(userName, m);
+                    List<String> mm = new ArrayList<>();
+                    name_messages.putIfAbsent(userName, mm);
                 }
                 break;
     }
