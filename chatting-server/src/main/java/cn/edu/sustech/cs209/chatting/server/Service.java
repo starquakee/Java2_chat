@@ -44,6 +44,20 @@ public class Service implements Runnable {
 
 
         while (true) {
+
+            try {
+                Thread.sleep(1000); // 等待1秒钟
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (!s.isConnected()) {
+                System.out.println("Connection lost!"); // 打印“Connection lost!”
+                break;
+            }else {
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+
             if(name_messages.get(user_name)!=null){
                 System.out.println(user_name+" "+name_messages.get(user_name)+" "+name_mess_num.get(user_name));
                 if(name_messages.get(user_name).size()>name_mess_num.get(user_name)){
@@ -52,6 +66,19 @@ public class Service implements Runnable {
             }
             if (!in.hasNext()) return;
             String mess = in.nextLine();
+//            System.out.println("line: "+line);
+//            if(mess.startsWith("Get")||mess.startsWith("Send")||mess.startsWith("Store")){
+//
+//            }
+//            else{
+//                String line;
+//                while ((line = in.nextLine()) != null) {
+//                    System.out.println("line: "+line);
+//                    mess = mess +"\n"+ line;
+//
+//                }
+//            }
+
             System.out.println("mess: "+mess);
             executeCommand(mess);
         }
@@ -129,6 +156,10 @@ public class Service implements Runnable {
                     List<String> mm = new ArrayList<>();
                     name_messages.putIfAbsent(userName, mm);
                 }
+                break;
+            case "Delete_user" :
+                String user_to_delete = message.split("!")[1];
+                user_names.remove(user_to_delete);
                 break;
     }
 //            if(name_messages.get(user_name)!=null){

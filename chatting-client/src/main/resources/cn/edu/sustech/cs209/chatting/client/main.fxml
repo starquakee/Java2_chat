@@ -38,6 +38,7 @@
         <padding>
             <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
         </padding>
+
         <Label fx:id="currentUsername" maxHeight="1.7976931348623157E308"
                text="Current User: USERNAME" HBox.hgrow="ALWAYS">
             <font>
@@ -47,6 +48,8 @@
                 <Color red="0.625" green="0.625" blue="0.625" fx:id="x4"/>
             </textFill>
         </Label>
+        <Button fx:id="serverOn" font="$x3" text="Server" textFill="$x4" style="-fx-background-color: white;" HBox.hgrow="NEVER" />
+
         <Pane HBox.hgrow="ALWAYS"/>
         <Label fx:id="currentOnlineCnt" font="$x3" text="Online: 1" textFill="$x4" HBox.hgrow="NEVER"/>
     </HBox>

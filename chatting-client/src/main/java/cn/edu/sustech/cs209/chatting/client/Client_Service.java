@@ -2,6 +2,9 @@ package cn.edu.sustech.cs209.chatting.client;
 
 import cn.edu.sustech.cs209.chatting.common.Message;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
@@ -22,11 +25,13 @@ public class Client_Service implements Runnable {
     ListView<Message> chatContentList;
     Map<String, List<Message>> name_content;
     Map<String, List<Message>> name_content_group;
+    ListView<String> chatList;
     String username;
     public Client_Service(Socket socket, List<String> user_names, Map<String, List<String>> name_messages,
                           Map<String, Integer> name_mess_num, Map<String, Socket> user_socket,
                           ListView<Message> chatContentList, String username, Label currentOnlineCnt,
-                          Map<String, List<Message>> name_content, Map<String, List<Message>> name_content_group){
+                          Map<String, List<Message>> name_content, Map<String, List<Message>> name_content_group,
+                          ListView<String> chatList){
         this.s=socket;
         this.user_names=user_names;
         this.name_messages=name_messages;
@@ -37,6 +42,7 @@ public class Client_Service implements Runnable {
         this.currentOnlineCnt=currentOnlineCnt;
         this.name_content=name_content;
         this.name_content_group=name_content_group;
+        this.chatList=chatList;
     }
     @Override
     public void run() {
@@ -56,6 +62,7 @@ public class Client_Service implements Runnable {
 
     public void doService() throws IOException, InterruptedException {
         while (true) {
+
             if(name_messages.get(user_name)!=null){
                 System.out.println(user_name+" "+name_messages.get(user_name)+" "+name_mess_num.get(user_name));
                 if(name_messages.get(user_name).size()>name_mess_num.get(user_name)){
@@ -106,9 +113,14 @@ public class Client_Service implements Runnable {
                 String send_by_get = message.split("!")[2];
                 String send_to_get = message.split("!")[3];
                 String input_get = message.split("!")[4];
+                if(input_get.contains("~")){
+                    input_get = input_get.replace("~", "\n");
+
+                }
                 System.out.println("input get: "+input_get);
                 Message message_get = new Message(time_get,send_by_get,send_to_get,input_get);
                 Thread.sleep(50);
+
                 List<Message> content= name_content.get(send_to_get);
                 if (content!=null){
                     content.add(message_get);
@@ -125,6 +137,16 @@ public class Client_Service implements Runnable {
                         chatContentList.getItems().add(message_get);
                     }
                 });
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        String selectedItem = chatList.getSelectionModel().getSelectedItem();
+                        if (selectedItem != null) {
+                            // 设置选中项的背景颜色为红色
+                            chatList.setStyle("-fx-selection-bar: red;");
+                        }
+                    }
+                });
 
                 break;
             case "Get_group_message":
@@ -132,6 +154,10 @@ public class Client_Service implements Runnable {
                 String send_by_get_group = message.split("!")[2];
                 String send_to_get_group = message.split("!")[3];
                 String input_get_group = message.split("!")[4];
+                if(input_get_group.contains("~")){
+                    input_get_group = input_get_group.replace("~", "\n");
+
+                }
                 System.out.println("input get: "+input_get_group);
                 Message message_get_group = new Message(time_get_group,send_by_get_group,send_to_get_group,input_get_group);
                 Thread.sleep(50);
@@ -149,6 +175,17 @@ public class Client_Service implements Runnable {
                     @Override
                     public void run() {
                         chatContentList.getItems().add(message_get_group);
+                    }
+                });
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        String selectedItem = chatList.getSelectionModel().getSelectedItem();
+                        if (selectedItem != null) {
+                            // 设置选中项的背景颜色为红色
+                            chatList.setStyle("-fx-selection-bar: red;");
+                        }
                     }
                 });
 
@@ -170,6 +207,7 @@ public class Client_Service implements Runnable {
                     List<String> m = new ArrayList<>();
                     name_messages.putIfAbsent(userName, m);
                 }
+
                 break;
         }
 //            if(name_messages.get(user_name)!=null){
