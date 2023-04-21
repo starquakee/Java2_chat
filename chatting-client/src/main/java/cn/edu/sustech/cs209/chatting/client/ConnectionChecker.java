@@ -2,14 +2,9 @@ package cn.edu.sustech.cs209.chatting.client;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ConnectionChecker implements Runnable {
     private Socket socket;
@@ -35,7 +30,7 @@ public class ConnectionChecker implements Runnable {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("LOST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
+                        System.out.println("LOST!!!");
                         serverOn.setStyle("-fx-background-color: red;");
                     }
                 });

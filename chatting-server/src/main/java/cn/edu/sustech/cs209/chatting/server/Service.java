@@ -161,33 +161,9 @@ public class Service implements Runnable {
                 String user_to_delete = message.split("!")[1];
                 user_names.remove(user_to_delete);
                 break;
+        }
     }
-//            if(name_messages.get(user_name)!=null){
-//                System.out.println(user_name+" "+name_messages.get(user_name)+" "+name_mess_num.get(user_name));
-//                if(name_messages.get(user_name).size()>name_mess_num.get(user_name)){
-//                    System.out.println("Server get mess");
-//                }
-//            }
-
-
-
-
-
-
-
-
-
-
-
-        }
-
-            //以下为关闭各种要关闭的资源
-//            fos.close();
-//            is.close();
-//            os.close();
-//            socket.close();
-
-        }
+}
 
 
 

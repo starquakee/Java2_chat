@@ -25,7 +25,6 @@ public class Main extends Application {
 
         Socket socket = new Socket("localhost", PORT);
         PrintWriter out = new PrintWriter(socket.getOutputStream());
-        Scanner in = new Scanner(socket.getInputStream());
         stage.setOnCloseRequest(event -> {
             out.println("Delete_user!"+recv);
             out.flush();

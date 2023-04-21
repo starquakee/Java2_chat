@@ -2,12 +2,8 @@ package cn.edu.sustech.cs209.chatting.client;
 
 import cn.edu.sustech.cs209.chatting.common.Message;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
@@ -210,31 +206,7 @@ public class Client_Service implements Runnable {
 
                 break;
         }
-//            if(name_messages.get(user_name)!=null){
-//                System.out.println(user_name+" "+name_messages.get(user_name)+" "+name_mess_num.get(user_name));
-//                if(name_messages.get(user_name).size()>name_mess_num.get(user_name)){
-//                    System.out.println("Server get mess");
-//                }
-//            }
-
-
-
-
-
-
-
-
-
-
-
     }
-
-    //以下为关闭各种要关闭的资源
-//            fos.close();
-//            is.close();
-//            os.close();
-//            socket.close();
-
 }
 
 

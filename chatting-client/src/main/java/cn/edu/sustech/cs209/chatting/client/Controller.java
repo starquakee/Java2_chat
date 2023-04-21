@@ -1,29 +1,24 @@
 package cn.edu.sustech.cs209.chatting.client;
 
 import cn.edu.sustech.cs209.chatting.common.Message;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URL;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+
 
 public class Controller implements Initializable {
 
@@ -133,8 +128,6 @@ public class Controller implements Initializable {
 
                 setOnMouseClicked(event -> {
                     chatList.setStyle("-fx-control-inner-background: white;");
-                    // 设置选中项的背景颜色为黄色
-//                    ( event.getTarget()).setStyle("-fx-control-inner-background: yellow;");
                     chatContentList.getItems().clear();
                     if (!isEmpty()) {
                         String selectedItem = getItem();
@@ -156,26 +149,6 @@ public class Controller implements Initializable {
                         for(int i=0;i<chatContentList.getItems().size();i++){
                             System.out.println(chatContentList.getItems().get(i).getSentBy()+" "+chatContentList.getItems().get(i).getSendTo()+" "+chatContentList.getItems().get(i).getData());
                         }
-
-//                        chatContentList.getItems().addAll(name_content.get(getItem())) ;
-//                        System.out.println("name_content:");
-//                        for (String name: name_content.keySet()){
-//                            List<Message> value = name_content.get(name);
-//                            System.out.println(name);
-//                            for(int i=0;i<value.size();i++){
-//                                System.out.println(value.get(i).getSentBy()+", "+value.get(i).getSendTo()+", "+value.get(i).getData());
-//                            }
-//                        }
-//                        System.out.println("name_content_group:");
-//                        for (String name: name_content_group.keySet()){
-//                            List<Message> value = name_content_group.get(name);
-//                            System.out.println(name);
-//                            for(int i=0;i<value.size();i++){
-//                                System.out.println(value.get(i).getSentBy()+", "+value.get(i).getSendTo()+", "+value.get(i).getData());
-//                            }
-//                        }
-//
-//                        System.out.println("selectedItem: "+selectedItem); // 打印所选项目的名称
                     }
                 });
             }
@@ -203,7 +176,7 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    public void createPrivateChat() throws IOException, InterruptedException {
+    public void createPrivateChat() throws InterruptedException {
         AtomicReference<String> user = new AtomicReference<>();
 
         Stage stage = new Stage();
@@ -213,8 +186,6 @@ public class Controller implements Initializable {
         out.println("Get_user_names");
         out.flush();
 
-
-//        String usernames = in.next();
         Thread.sleep(50);
         List<String> usernames = Main.users;
         System.out.println("usernames: "+usernames);
@@ -249,7 +220,6 @@ public class Controller implements Initializable {
 
             chatList.getItems().addAll(chatSet);
             chatList.getItems().addAll(chatGroupSet);
-//            chatContentList.getItems().add(new Message(System.currentTimeMillis(),username,user.get(),"\uD83D\uDE00"));
         }
 
 
@@ -269,7 +239,7 @@ public class Controller implements Initializable {
      * UserA, UserB (2)
      */
     @FXML
-    public void createGroupChat() throws IOException, InterruptedException {
+    public void createGroupChat() throws InterruptedException {
         List<AtomicReference<String>> users = new ArrayList<>();
         List<String> users_ = new ArrayList<>();
         String group_name = "";
@@ -288,9 +258,6 @@ public class Controller implements Initializable {
         hbox.setAlignment(Pos.CENTER);
         hbox.setPadding(new Insets(20, 20, 20, 20));
         List<CheckBox> checkBoxes = new ArrayList<>();
-//        for(int i=0;i<usernames.split("!").length;i++){
-//            checkBoxes.add(new CheckBox(usernames.split("!")[i]));
-//        }
         for (String s : usernames) {
             checkBoxes.add(new CheckBox(s));
         }
@@ -325,16 +292,14 @@ public class Controller implements Initializable {
                 group_name+=users_.get(users_.size()-1)+" ("+users_.size()+")";
             }
             System.out.println("group_name: "+group_name);
-            if(group_name!=null){
-                chatGroupSet.add(group_name);
-                allChatSet.add(group_name);
-                List<Message> content = new ArrayList<>();
-                name_content_group.putIfAbsent(group_name, content);
-                chatList.getItems().clear();
+            chatGroupSet.add(group_name);
+            allChatSet.add(group_name);
+            List<Message> content = new ArrayList<>();
+            name_content_group.putIfAbsent(group_name, content);
+            chatList.getItems().clear();
 
-                chatList.getItems().addAll(chatSet);
-                chatList.getItems().addAll(chatGroupSet);
-            }
+            chatList.getItems().addAll(chatSet);
+            chatList.getItems().addAll(chatGroupSet);
         }
 
 
@@ -348,7 +313,7 @@ public class Controller implements Initializable {
      * After sending the message, you should clear the text input field.
      */
     @FXML
-    public void doSendMessage() throws IOException {
+    public void doSendMessage() {
         current_selected = chatList.getSelectionModel().getSelectedItem();
         System.out.println(current_selected);
         String send_to = current_selected;
@@ -360,7 +325,6 @@ public class Controller implements Initializable {
         }
         inputArea.clear();
         Long time = System.currentTimeMillis();
-//        chatContentList.getItems().add(new Message(time,send_by,send_to,input));
         if (send_to!=null && !Objects.equals(input, "")){
             Message message = new Message(time,send_by,send_to,input.replace("~", "\n"));
             System.out.println("input: "+input);
@@ -377,23 +341,6 @@ public class Controller implements Initializable {
                 name_content.put(send_to, content);
             }
 
-
-//            System.out.println("name_content: ");
-//            for (String name: name_content.keySet()){
-//                List<Message> value = name_content.get(name);
-//                System.out.println(name);
-//                for(int i=0;i<value.size();i++){
-//                    System.out.println(value.get(i).getSentBy()+"  "+value.get(i).getSendTo()+"  "+value.get(i).getData());
-//                }
-//            }
-//            System.out.println("name_content_group: ");
-//            for (String name: name_content_group.keySet()){
-//                List<Message> value = name_content_group.get(name);
-//                System.out.println(name);
-//                for(int i=0;i<value.size();i++){
-//                    System.out.println(value.get(i).getSentBy()+"  "+value.get(i).getSendTo()+"  "+value.get(i).getData());
-//                }
-//            }
             chatContentList.getItems().add(message);
             String command_type;
             if(send_to.contains(", ")){//多人
