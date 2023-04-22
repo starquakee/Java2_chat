@@ -25,7 +25,7 @@ public class Main {
         final int PORT = 9999;
         ServerSocket server = new ServerSocket(PORT);
         System.out.println("Waiting for clients to connect...");
-        while (true){
+        while (true) {
             Socket s = server.accept();
             new Thread(new Service(s, user_names, name_messages, name_mess_num, user_socket)).start();
         }

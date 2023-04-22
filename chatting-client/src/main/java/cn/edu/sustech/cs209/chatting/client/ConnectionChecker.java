@@ -2,6 +2,7 @@ package cn.edu.sustech.cs209.chatting.client;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
